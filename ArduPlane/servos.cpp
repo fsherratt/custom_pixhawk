@@ -588,10 +588,33 @@ void Plane::set_servos_flaps(void)
          SRV_Channels::function_assigned(SRV_Channel::k_vtail_right ) ) 
     {
         int16_t ruddVal = (int16_t)(int32_t(SRV_Channels::get_output_scaled(SRV_Channel::k_rudder)));
+        // int16_t flap = (int16_t)(int32_t(SRV_Channels::get_output_scaled(SRV_Channel::k_flap)));
         int16_t flap = 90 * manual_flap_percent - SERVO_MAX;
+        
+        int16_t drag_left = flap + ruddVal;
+        int16_t drag_right = flap - ruddVal;
 
-        SRV_Channels::set_output_scaled( SRV_Channel::k_vtail_left, ruddVal);
-        SRV_Channels::set_output_scaled( SRV_Channel::k_vtail_right, flap );
+        if ( drag_left > SERVO_MAX )
+        {
+            drag_right -= ( drag_left - SERVO_MAX );
+        }
+        else if ( drag_right > SERVO_MAX )
+        {
+            drag_left -= ( drag_right - SERVO_MAX );
+        }
+        else if ( drag_left < -SERVO_MAX )
+        {
+            drag_right -= ( drag_left + SERVO_MAX );
+        }
+        else if ( drag_right < -SERVO_MAX )
+        {
+            drag_left -= ( drag_right + SERVO_MAX );
+        }
+
+
+        SRV_Channels::set_output_scaled( SRV_Channel::k_vtail_left, drag_left);
+        SRV_Channels::set_output_scaled( SRV_Channel::k_vtail_right, drag_right );
+        //channel_function_mixer(SRV_Channel::k_rudder,  SRV_Channel::k_elevator, SRV_Channel::k_vtail_right, SRV_Channel::k_vtail_left);
     }
 }
 
