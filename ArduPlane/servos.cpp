@@ -582,6 +582,17 @@ void Plane::set_servos_flaps(void)
     if (g.flaperon_output != MIXING_DISABLED && g.elevon_output == MIXING_DISABLED && g.mix_mode == 0) {
         flaperon_update(auto_flap_percent);
     }
+
+
+    if ( SRV_Channels::function_assigned(SRV_Channel::k_vtail_left  ) ||
+         SRV_Channels::function_assigned(SRV_Channel::k_vtail_right ) ) 
+    {
+        int16_t ruddVal = (int16_t)(int32_t(SRV_Channels::get_output_scaled(SRV_Channel::k_rudder)));
+        int16_t flap = 90 * manual_flap_percent - SERVO_MAX;
+
+        SRV_Channels::set_output_scaled( SRV_Channel::k_vtail_left, ruddVal);
+        SRV_Channels::set_output_scaled( SRV_Channel::k_vtail_right, flap );
+    }
 }
 
 
@@ -634,14 +645,14 @@ void Plane::servo_output_mixers(void)
             SRV_Channels::set_output_scaled(SRV_Channel::k_dspoiler2,
                                                 (int16_t(ch4)-1500) * (int16_t)(SERVO_MAX/300) / (int16_t)2);
         }
+        
     }
-
 
     // allow for extra elevon and vtail channels
     channel_function_mixer(SRV_Channel::k_aileron, SRV_Channel::k_elevator, SRV_Channel::k_elevon_left, SRV_Channel::k_elevon_right);
-    channel_function_mixer(SRV_Channel::k_rudder,  SRV_Channel::k_elevator, SRV_Channel::k_vtail_right, SRV_Channel::k_vtail_left);
-}
-
+    // Changed this to accont for flaps into V Tail rather than elevator
+    //channel_function_mixer(SRV_Channel::k_rudder,  SRV_Channel::k_elevator, SRV_Channel::k_vtail_right, SRV_Channel::k_vtail_left);
+} 
 /*
   support for twin-engine planes
  */
