@@ -678,12 +678,14 @@ void Plane::servos_payload_mix(void)
 {
     if ( SRV_Channels::function_assigned( SRV_Channel::k_payload ) )
     {
+        int16_t percent;
         // TODO: get fixed RC channel for testing, need to add support for selecting
+        // k_payload defined as fucntion number 88
         // work out any manual flap input fir channel 13
         RC_Channel * payloadSel = RC_Channels::rc_channel(12);
         payloadSel->input();
 
-        percent = 45 * payloadSel->percent_input();
+        percent = 90 * (int16_t)payloadSel->percent_input() - SERVO_MAX;
 
         SRV_Channels::set_output_scaled( SRV_Channel::k_payload, percent);
     }
@@ -791,6 +793,9 @@ void Plane::set_servos(void)
 
     // setup drag rudder outputs
     servos_drag_rudder_mix();
+
+    // setup payload output
+    servos_payload_mix();
     
     if (control_mode >= FLY_BY_WIRE_B ||
         quadplane.in_assisted_flight() ||
