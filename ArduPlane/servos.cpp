@@ -671,6 +671,23 @@ void Plane::servos_drag_rudder_mix(void)
     }
 }
 
+/*
+Added supportfor payload drops, need to be able to trigger of a DO SET COmmand and manual controller
+*/
+void Plane::servos_payload_mix(void)
+{
+    if ( SRV_Channels::function_assigned( SRV_Channel::k_payload ) )
+    {
+        // TODO: get fixed RC channel for testing, need to add support for selecting
+        // work out any manual flap input fir channel 13
+        RC_Channel * payloadSel = RC_Channels::rc_channel(12);
+        payloadSel->input();
+
+        percent = 45 * payloadSel->percent_input();
+
+        SRV_Channels::set_output_scaled( SRV_Channel::k_payload, percent);
+    }
+}
 
 /*
   support for twin-engine planes
