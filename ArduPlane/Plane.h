@@ -1027,6 +1027,7 @@ private:
     void set_servos_old_elevons(void);
     void set_servos_flaps(void);
     void servo_output_mixers(void);
+    void servos_drag_rudder_mix(void);
     void servos_output(void);
     void servos_auto_trim(void);
     void servos_twin_engine_mix();

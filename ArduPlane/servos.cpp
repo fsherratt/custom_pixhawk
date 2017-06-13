@@ -582,40 +582,6 @@ void Plane::set_servos_flaps(void)
     if (g.flaperon_output != MIXING_DISABLED && g.elevon_output == MIXING_DISABLED && g.mix_mode == 0) {
         flaperon_update(auto_flap_percent);
     }
-
-
-    if ( SRV_Channels::function_assigned(SRV_Channel::k_vtail_left  ) ||
-         SRV_Channels::function_assigned(SRV_Channel::k_vtail_right ) ) 
-    {
-        int16_t ruddVal = (int16_t)(int32_t(SRV_Channels::get_output_scaled(SRV_Channel::k_rudder)));
-        // int16_t flap = (int16_t)(int32_t(SRV_Channels::get_output_scaled(SRV_Channel::k_flap)));
-        int16_t flap = 90 * manual_flap_percent - SERVO_MAX;
-        
-        int16_t drag_left = flap + ruddVal;
-        int16_t drag_right = flap - ruddVal;
-
-        if ( drag_left > SERVO_MAX )
-        {
-            drag_right -= ( drag_left - SERVO_MAX );
-        }
-        else if ( drag_right > SERVO_MAX )
-        {
-            drag_left -= ( drag_right - SERVO_MAX );
-        }
-        else if ( drag_left < -SERVO_MAX )
-        {
-            drag_right -= ( drag_left + SERVO_MAX );
-        }
-        else if ( drag_right < -SERVO_MAX )
-        {
-            drag_left -= ( drag_right + SERVO_MAX );
-        }
-
-
-        SRV_Channels::set_output_scaled( SRV_Channel::k_vtail_left, drag_left);
-        SRV_Channels::set_output_scaled( SRV_Channel::k_vtail_right, drag_right );
-        //channel_function_mixer(SRV_Channel::k_rudder,  SRV_Channel::k_elevator, SRV_Channel::k_vtail_right, SRV_Channel::k_vtail_left);
-    }
 }
 
 
@@ -676,6 +642,36 @@ void Plane::servo_output_mixers(void)
     // Changed this to accont for flaps into V Tail rather than elevator
     //channel_function_mixer(SRV_Channel::k_rudder,  SRV_Channel::k_elevator, SRV_Channel::k_vtail_right, SRV_Channel::k_vtail_left);
 } 
+
+
+/*
+  support for drag rudders -- yeah boy
+ */
+void Plane::servos_drag_rudder_mix(void)
+{
+    if ( SRV_Channels::function_assigned(SRV_Channel::k_drag_rud_left  ) &&
+         SRV_Channels::function_assigned(SRV_Channel::k_drag_rud_right ) ) 
+    {
+        int16_t ruddVal = 0;
+        int16_t flap = 0;
+
+        ruddVal = (int16_t)( int32_t(SRV_Channels::get_output_scaled(SRV_Channel::k_rudder)) );
+
+        // work out any manual flap input
+        RC_Channel * flapin = RC_Channels::rc_channel(g.flapin_channel-1);
+        flapin->input();
+
+        flap = 45 * flapin->percent_input();
+
+        int16_t drag_left  = flap + ruddVal;
+        int16_t drag_right = flap - ruddVal;
+
+        SRV_Channels::set_output_scaled( SRV_Channel::k_drag_rud_left, drag_left);
+        SRV_Channels::set_output_scaled( SRV_Channel::k_drag_rud_right, drag_right );
+    }
+}
+
+
 /*
   support for twin-engine planes
  */
@@ -775,6 +771,9 @@ void Plane::set_servos(void)
 
     // setup flap outputs
     set_servos_flaps();
+
+    // setup drag rudder outputs
+    servos_drag_rudder_mix();
     
     if (control_mode >= FLY_BY_WIRE_B ||
         quadplane.in_assisted_flight() ||
@@ -825,13 +824,13 @@ void Plane::set_servos(void)
         // after an auto land and auto disarm, set the servos to be neutral just
         // in case we're upside down or some crazy angle and straining the servos.
         if (landing.get_then_servos_neutral() == 1) {
-            SRV_Channels::set_output_limit(SRV_Channel::k_aileron, SRV_Channel::SRV_CHANNEL_LIMIT_TRIM);
+            SRV_Channels::set_output_limit(SRV_Channel::k_aileron,  SRV_Channel::SRV_CHANNEL_LIMIT_TRIM);
             SRV_Channels::set_output_limit(SRV_Channel::k_elevator, SRV_Channel::SRV_CHANNEL_LIMIT_TRIM);
-            SRV_Channels::set_output_limit(SRV_Channel::k_rudder, SRV_Channel::SRV_CHANNEL_LIMIT_TRIM);
+            SRV_Channels::set_output_limit(SRV_Channel::k_rudder,   SRV_Channel::SRV_CHANNEL_LIMIT_TRIM);
         } else if (landing.get_then_servos_neutral() == 2) {
-            SRV_Channels::set_output_limit(SRV_Channel::k_aileron, SRV_Channel::SRV_CHANNEL_LIMIT_ZERO_PWM);
+            SRV_Channels::set_output_limit(SRV_Channel::k_aileron,  SRV_Channel::SRV_CHANNEL_LIMIT_ZERO_PWM);
             SRV_Channels::set_output_limit(SRV_Channel::k_elevator, SRV_Channel::SRV_CHANNEL_LIMIT_ZERO_PWM);
-            SRV_Channels::set_output_limit(SRV_Channel::k_rudder, SRV_Channel::SRV_CHANNEL_LIMIT_ZERO_PWM);
+            SRV_Channels::set_output_limit(SRV_Channel::k_rudder,   SRV_Channel::SRV_CHANNEL_LIMIT_ZERO_PWM);
         }
     }
 

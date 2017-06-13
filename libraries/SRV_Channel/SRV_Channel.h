@@ -114,6 +114,8 @@ public:
         k_motor10               = 83,
         k_motor11               = 84,
         k_motor12               = 85,
+        k_drag_rud_left         = 86,            ///< Left drag rudder
+        k_drag_rud_right        = 87,            ///< Right drag rudder
         k_nr_aux_servo_functions         ///< This must be the last enum value (only add new values _before_ this one)
     } Aux_servo_function_t;
 

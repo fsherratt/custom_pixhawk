@@ -114,6 +114,8 @@ void SRV_Channel::aux_servo_function_setup(void)
     case k_elevon_right:
     case k_vtail_left:
     case k_vtail_right:
+    case k_drag_rud_left:
+    case k_drag_rud_right:
         set_angle(4500);
         break;
     case k_throttle:
