@@ -571,6 +571,11 @@ void Plane::set_servos_flaps(void)
         auto_flap_percent = manual_flap_percent;
     }
 
+    if ( control_mode == FLIGHT_LAND )
+    {
+        manual_flap_percent =  100;
+    }
+
     SRV_Channels::set_output_scaled(SRV_Channel::k_flap_auto, auto_flap_percent);
     SRV_Channels::set_output_scaled(SRV_Channel::k_flap, manual_flap_percent);
 
@@ -653,20 +658,17 @@ void Plane::servos_drag_rudder_mix(void)
          SRV_Channels::function_assigned(SRV_Channel::k_drag_rud_right ) ) 
     {
         int16_t ruddVal = 0;
-        int16_t flap = 0;
+        int16_t flapVal = 0;
 
         ruddVal = (int16_t)( int32_t(SRV_Channels::get_output_scaled(SRV_Channel::k_rudder)) );
+        flapVal = (int16_t)( int32_t(SRV_Channels::get_output_scaled(SRV_Channel::k_flap)) );
 
-        // work out any manual flap input
-        RC_Channel * flapin = RC_Channels::rc_channel(g.flapin_channel-1);
-        flapin->input();
+        flapVal *= 45; // Scal from ±100 to ±4500
 
-        flap = 45 * flapin->percent_input();
+        int16_t drag_left  = flapVal + ruddVal;
+        int16_t drag_right = flapVal - ruddVal;
 
-        int16_t drag_left  = flap + ruddVal;
-        int16_t drag_right = flap - ruddVal;
-
-        SRV_Channels::set_output_scaled( SRV_Channel::k_drag_rud_left, drag_left);
+        SRV_Channels::set_output_scaled( SRV_Channel::k_drag_rud_left, drag_left );
         SRV_Channels::set_output_scaled( SRV_Channel::k_drag_rud_right, drag_right );
     }
 }
