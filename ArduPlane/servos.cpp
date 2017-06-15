@@ -693,7 +693,7 @@ void Plane::servos_payload_mix(void)
         // TODO: get fixed RC channel for testing, need to add support for selecting
         // k_payload defined as fucntion number 88
         // work out any manual flap input fir channel 13
-        RC_Channel * payloadSel = RC_Channels::rc_channel(12);
+        RC_Channel * payloadSel = RC_Channels::rc_channel( g2.payload_rc_in );
         payloadSel->input();
 
         percent = 90 * (int16_t)payloadSel->percent_input() - SERVO_MAX;
