@@ -690,6 +690,8 @@ void Plane::servos_payload_mix(void)
     if ( SRV_Channels::function_assigned( SRV_Channel::k_payload ) )
     {
         int16_t percent;
+        int8_t waypoint1;
+
         // TODO: get fixed RC channel for testing, need to add support for selecting
         // k_payload defined as fucntion number 88
         // work out any manual flap input fir channel 13
@@ -697,6 +699,11 @@ void Plane::servos_payload_mix(void)
         payloadSel->input();
 
         percent = 90 * (int16_t)payloadSel->percent_input() - SERVO_MAX;
+
+        if( mission.get_current_nav_index() > g2.payload_wp_1 )
+        {
+            percent = SERVO_MAX;
+        }
 
         SRV_Channels::set_output_scaled( SRV_Channel::k_payload, percent);
     }
