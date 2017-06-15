@@ -1228,6 +1228,13 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     // @User: Standard
     AP_GROUPINFO("RUDD_DT_GAIN", 9, ParametersG2, rudd_dt_gain, 10),
 
+    // @Param: PAYLOAD_WP_1
+    // @DisplayName: First Payload Deployment Waypoint
+    // @Description: Sets the first waypoint for payload 1 to be deployed on
+    // @Range: 1 100
+    // @User: Advanced
+    AP_GROUPINFO("PAYLOAD_WP_1", 11, ParametersG2, payload_wp_1, 12),
+
     AP_GROUPEND
 };
 

@@ -350,6 +350,10 @@ public:
         k_param_DataFlash = 253, // Logging Group
 
         // 254,255: reserved
+
+        // 260:Payload
+        k_param_payload_wp_1 = 260
+
     };
 
     AP_Int16 format_version;
@@ -548,6 +552,9 @@ public:
 
     // dual motor tailsitter rudder to differential thrust scaling: 0-100%
     AP_Int8 rudd_dt_gain;
+
+    // Waypoint 1 location
+    AP_Int16 payload_wp_1;
 };
 
 extern const AP_Param::Info var_info[];
