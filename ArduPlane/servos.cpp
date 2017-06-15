@@ -571,18 +571,13 @@ void Plane::set_servos_flaps(void)
         auto_flap_percent = manual_flap_percent;
     }
 
-    if ( control_mode == FLIGHT_LAND )
-    {
-        manual_flap_percent =  100;
-    }
-
     SRV_Channels::set_output_scaled(SRV_Channel::k_flap_auto, auto_flap_percent);
     SRV_Channels::set_output_scaled(SRV_Channel::k_flap, manual_flap_percent);
 
     if (g.flap_slewrate) {
         SRV_Channels::limit_slew_rate(SRV_Channel::k_flap_auto, g.flap_slewrate, G_Dt);
         SRV_Channels::limit_slew_rate(SRV_Channel::k_flap, g.flap_slewrate, G_Dt);
-    }    
+    }
 
     if (g.flaperon_output != MIXING_DISABLED && g.elevon_output == MIXING_DISABLED && g.mix_mode == 0) {
         flaperon_update(auto_flap_percent);
@@ -645,7 +640,7 @@ void Plane::servo_output_mixers(void)
     // allow for extra elevon and vtail channels
     channel_function_mixer(SRV_Channel::k_aileron, SRV_Channel::k_elevator, SRV_Channel::k_elevon_left, SRV_Channel::k_elevon_right);
     // Changed this to accont for flaps into V Tail rather than elevator
-    //channel_function_mixer(SRV_Channel::k_rudder,  SRV_Channel::k_elevator, SRV_Channel::k_vtail_right, SRV_Channel::k_vtail_left);
+    channel_function_mixer(SRV_Channel::k_rudder,  SRV_Channel::k_elevator, SRV_Channel::k_vtail_right, SRV_Channel::k_vtail_left);
 } 
 
 
@@ -661,7 +656,21 @@ void Plane::servos_drag_rudder_mix(void)
         int16_t flapVal = 0;
 
         ruddVal = (int16_t)( int32_t(SRV_Channels::get_output_scaled(SRV_Channel::k_rudder)) );
-        flapVal = (int16_t)( int32_t(SRV_Channels::get_output_scaled(SRV_Channel::k_flap)) );
+        flapVal = (int16_t)( int32_t(SRV_Channels::get_output_scaled(SRV_Channel::k_flap_auto)) );
+
+        static int16_t lastFlap = flapVal;
+
+        //uint16_t max_change = (ch.get_output_max() - ch.get_output_min()) * g.flap_slewrate * G_Dt * 0.01f;
+        uint16_t max_change = 1000 * g.flap_slewrate * G_Dt * 0.01f;
+
+        if (max_change == 0) {
+            // always allow some change
+            max_change = 1;
+        }
+
+        flapVal = constrain_int16( flapVal, lastFlap - max_change, lastFlap + max_change );
+
+        lastFlap = flapVal;
 
         flapVal *= 45; // Scal from ±100 to ±4500
 
@@ -669,7 +678,7 @@ void Plane::servos_drag_rudder_mix(void)
         int16_t drag_right = flapVal - ruddVal;
 
         SRV_Channels::set_output_scaled( SRV_Channel::k_drag_rud_left, drag_left );
-        SRV_Channels::set_output_scaled( SRV_Channel::k_drag_rud_right, drag_right );
+        SRV_Channels::set_output_scaled( SRV_Channel::k_drag_rud_right, drag_right );   
     }
 }
 
