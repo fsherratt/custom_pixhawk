@@ -1031,6 +1031,7 @@ private:
     void servos_drag_rudder_mix(void);
     // Payload support
     void servos_payload_mix(void);
+    void payload_deployment_timer(int8_t *payload_deployed, int16_t *deployment_timer, int16_t *percent );
     void servos_output(void);
     void servos_auto_trim(void);
     void servos_twin_engine_mix();

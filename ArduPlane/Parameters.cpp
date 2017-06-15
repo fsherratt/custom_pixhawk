@@ -1239,10 +1239,18 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
 
     // @Param: PAYLOAD_WP_1
     // @DisplayName: First Payload Deployment Waypoint
-    // @Description: Sets the first waypoint for payload 1 to be deployed on
+    // @Description: Sets the waypoint for payload 1 to be deployed on
     // @Range: 1 100
     // @User: Standard
     AP_GROUPINFO("PAYLOAD_WP_1", 12, ParametersG2, payload_wp_1, 100),
+
+
+    // @Param: PAYLOAD_WP_2
+    // @DisplayName: Second Payload Deployment Waypoint
+    // @Description: Sets the waypoint for payload 2 to be deployed on
+    // @Range: 1 100
+    // @User: Standard
+    AP_GROUPINFO("PAYLOAD_WP_2", 12, ParametersG2, payload_wp_2, 100),
 
     // // @Param: PAYLOAD_WP_1
     // // @DisplayName: First Payload Deployment Waypoint

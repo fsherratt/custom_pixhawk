@@ -354,6 +354,7 @@ public:
         // 260:Payload
         k_param_payload_rc_in = 260,
         k_param_payload_wp_1,
+        k_param_payload_wp_2,
 
     };
 
@@ -559,6 +560,9 @@ public:
     
     // Waypoint 1 location
     AP_Int8 payload_wp_1;
+
+    // Waypoint 1 location
+    AP_Int8 payload_wp_2;
 };
 
 extern const AP_Param::Info var_info[];

@@ -13,3 +13,7 @@
 #ifndef PAYLOAD_WP_1
  # define PAYLOAD_WP_1      100     // default value for my new parameter
 #endif
+
+#ifndef PAYLOAD_WP_2
+ # define PAYLOAD_WP_2      100     // default value for my new parameter
+#endif
