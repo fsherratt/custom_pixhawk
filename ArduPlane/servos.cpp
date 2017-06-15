@@ -691,13 +691,15 @@ void Plane::servos_payload_mix(void)
     // Initialise payload values
     static int8_t payload_1_deployed = 0;
     static int8_t payload_2_deployed = 0;
-    static int8_t deployment_timer = 0;
+    static int16_t deployment_timer = 0;
 
     if ( SRV_Channels::function_assigned( SRV_Channel::k_payload ) )
     {
+        // gcs_send_text(MAV_SEVERITY_INFO, "In payload loop");
+
         int16_t percent;
         int8_t current_waypoint = mission.get_current_nav_index();
-
+        // gcs_send_text_fmt(MAV_SEVERITY_INFO, "Current WP : %u", current_waypoint);
         // k_payload defined as fucntion number 88
         RC_Channel * payloadSel = RC_Channels::rc_channel( g2.payload_rc_in );
         payloadSel->input();
@@ -707,13 +709,15 @@ void Plane::servos_payload_mix(void)
 
         // If we have just passed the mission waypoint for deployment, drop the payload
         if( ( current_waypoint > g2.payload_wp_1 ) &&
-            ( current_waypoint < g2.payload_wp_1 + 1 ) &&
+            ( current_waypoint < g2.payload_wp_1 + 2 ) &&
             ( control_mode == AUTO ) &&
             ( payload_1_deployed == 0 ) )
         {
+            // gcs_send_text(MAV_SEVERITY_INFO, "In Deployemnt loop");
             // 5 second delay timer, might make as a parameter
-            if( deployment_timer > 25 )
+            if( deployment_timer > 250 )
             {
+                gcs_send_text(MAV_SEVERITY_INFO, "Payload 1 Deployed");
                 payload_1_deployed = 1;
                 percent = 0;
                 deployment_timer = 0;
@@ -722,14 +726,21 @@ void Plane::servos_payload_mix(void)
             else if( deployment_timer != 0 )
             {
                 percent = SERVO_MAX * 0.9;
-                deployment_timer += G_Dt;
+                // hal.console->printf("Percent=%u\n", percent); 
+                deployment_timer += 1;
+                // gcs_send_text_fmt(MAV_SEVERITY_INFO, "Servo Percentage : %u", percent);
+                // gcs_send_text_fmt(MAV_SEVERITY_INFO, "Timer : %u", deployment_timer );
             }
             else
             {
+                gcs_send_text(MAV_SEVERITY_INFO, "Beginning Deployment");
+                // gcs_send_text_fmt(MAV_SEVERITY_INFO, "Adding %u to timer",G_Dt);
                 // Give us a pretty message to show we do stuff
-                deployment_timer += G_Dt;
-                gcs_send_text(MAV_SEVERITY_WARNING, "AUTO PAYLOAD DEPLOYED");
+                deployment_timer += 1;               
+                //gcs_send_text(MAV_SEVERITY_WARNING, "PAYLOAD 1");
             }
+
+            // gcs_send_text_fmt(MAV_SEVERITY_INFO, "Timer : %u", deployment_timer);
             // how to add delay??
 
             // deployment_timer = get_system_clock_utc()
