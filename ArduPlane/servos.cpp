@@ -19,6 +19,7 @@
 #include "Plane.h"
 #include <utility>
 
+
 /*****************************************
 * Throttle slew limit
 *****************************************/
@@ -687,22 +688,52 @@ Added supportfor payload drops, need to be able to trigger of a DO SET COmmand a
 */
 void Plane::servos_payload_mix(void)
 {
+    // Initialise payload values
+    static int8_t payload_1_deployed = 0;
+    static int8_t payload_2_deployed = 0;
+    static int8_t deployment_timer = 0;
+
     if ( SRV_Channels::function_assigned( SRV_Channel::k_payload ) )
     {
         int16_t percent;
-        int8_t waypoint1;
+        int8_t current_waypoint = mission.get_current_nav_index();
 
-        // TODO: get fixed RC channel for testing, need to add support for selecting
         // k_payload defined as fucntion number 88
-        // work out any manual flap input fir channel 13
         RC_Channel * payloadSel = RC_Channels::rc_channel( g2.payload_rc_in );
         payloadSel->input();
 
+        // Gets out manual percentage
         percent = 90 * (int16_t)payloadSel->percent_input() - SERVO_MAX;
 
-        if( mission.get_current_nav_index() > g2.payload_wp_1 )
+        // If we have just passed the mission waypoint for deployment, drop the payload
+        if( ( current_waypoint > g2.payload_wp_1 ) &&
+            ( current_waypoint < g2.payload_wp_1 + 1 ) &&
+            ( control_mode == AUTO ) &&
+            ( payload_1_deployed == 0 ) )
         {
-            percent = SERVO_MAX;
+            // 5 second delay timer, might make as a parameter
+            if( deployment_timer > 25 )
+            {
+                payload_1_deployed = 1;
+                percent = 0;
+                deployment_timer = 0;
+            }
+            // If we havent started counting, ount each loop until it reaches deployment timer
+            else if( deployment_timer != 0 )
+            {
+                percent = SERVO_MAX * 0.9;
+                deployment_timer += G_Dt;
+            }
+            else
+            {
+                // Give us a pretty message to show we do stuff
+                deployment_timer += G_Dt;
+                gcs_send_text(MAV_SEVERITY_WARNING, "AUTO PAYLOAD DEPLOYED");
+            }
+            // how to add delay??
+
+            // deployment_timer = get_system_clock_utc()
+            //hal.console->printf("G_Dt_max=%u\n", G_Dt_max); 
         }
 
         SRV_Channels::set_output_scaled( SRV_Channel::k_payload, percent);
