@@ -11,6 +11,7 @@
 #define GOBJECT(v, name, class) { AP_PARAM_GROUP, name, Parameters::k_param_ ## v, (const void *)&plane.v, {group_info : class::var_info} }
 #define GOBJECTN(v, pname, name, class) { AP_PARAM_GROUP, name, Parameters::k_param_ ## pname, (const void *)&plane.v, {group_info : class::var_info} }
 
+
 const AP_Param::Info Plane::var_info[] = {
     // @Param: FORMAT_VERSION
     // @DisplayName: Eeprom format version number
@@ -1228,12 +1229,28 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     // @User: Standard
     AP_GROUPINFO("RUDD_DT_GAIN", 9, ParametersG2, rudd_dt_gain, 10),
 
+
+    // @Param: PAYLOAD_RC_CHAN
+    // @DisplayName: Payload RC Channel
+    // @Description: RC input channel for payload deployment
+    // @Range: 1 16
+    // @User: Standard
+    AP_GROUPINFO("PAYLOAD_RC_IN", 11, ParametersG2, payload_rc_in, 0),
+
     // @Param: PAYLOAD_WP_1
     // @DisplayName: First Payload Deployment Waypoint
     // @Description: Sets the first waypoint for payload 1 to be deployed on
     // @Range: 1 100
-    // @User: Advanced
-    AP_GROUPINFO("PAYLOAD_WP_1", 11, ParametersG2, payload_wp_1, 12),
+    // @User: Standard
+    AP_GROUPINFO("PAYLOAD_WP_1", 12, ParametersG2, payload_wp_1, 100),
+
+    // // @Param: PAYLOAD_WP_1
+    // // @DisplayName: First Payload Deployment Waypoint
+    // // @Description: Sets the first waypoint for payload 1 to be deployed on
+    // // @Range: 1 100
+    // // @Increment: 1
+    // // @User: Standard
+    // GSCALAR(payload_wp_1,        "PAYLOAD_WP_1",      100),
 
     AP_GROUPEND
 };

@@ -6,6 +6,10 @@
 // longer valid! You should switch to using CONFIG_HAL_BOARD via the HAL_BOARD
 // flag in your local config.mk instead.
 
+#ifndef PAYLOAD_RC_IN
+ # define PAYLOAD_RC_IN      0     // default value for my new parameter
+#endif
+
 #ifndef PAYLOAD_WP_1
  # define PAYLOAD_WP_1      100     // default value for my new parameter
 #endif

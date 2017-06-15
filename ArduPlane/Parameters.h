@@ -352,7 +352,8 @@ public:
         // 254,255: reserved
 
         // 260:Payload
-        k_param_payload_wp_1 = 260
+        k_param_payload_rc_in = 260,
+        k_param_payload_wp_1,
 
     };
 
@@ -554,7 +555,10 @@ public:
     AP_Int8 rudd_dt_gain;
 
     // Waypoint 1 location
-    AP_Int16 payload_wp_1;
+    AP_Int8 payload_rc_in;
+    
+    // Waypoint 1 location
+    AP_Int8 payload_wp_1;
 };
 
 extern const AP_Param::Info var_info[];
