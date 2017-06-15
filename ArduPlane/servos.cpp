@@ -684,25 +684,39 @@ void Plane::servos_drag_rudder_mix(void)
 }
 
 
-void Plane::payload_deployment_timer(int8_t *payload_deployed, int16_t *deployment_timer, int16_t *percent )
+void Plane::payload_deployment_timer(int8_t *payload_deployed, int16_t *deployment_timer, int16_t *percent, int8_t deployment_direction )
 {
     // 5 second delay timer, might make as a parameter
     if( *deployment_timer > 250 )
-    {
+    {   
+        int8_t payload_num;
+        // Lazy payload number decleration
+        switch(deployment_direction)
+        {
+            case 1:
+                payload_num = 1;
+                break;
+            case -1:
+                payload_num = 2;
+                break;
+            default:
+                payload_num = 0;
+        }
+
         // Write deployed and prevent further calls
-        gcs_send_text(MAV_SEVERITY_INFO, "Payload 1 Deployed");
+        gcs_send_text_fmt(MAV_SEVERITY_WARNING, "Payload %i Deployed!", payload_num);
         *payload_deployed = 1;
         *deployment_timer = 0;
     }
     // If we havent started counting, count each loop until it reaches deployment timer
     else if( *deployment_timer != 0 )
     {
-        *percent = SERVO_MAX * 0.9; 
+        *percent = SERVO_MAX * 0.9 * deployment_direction; 
         *deployment_timer += 1;
     }
     else
     {
-        gcs_send_text(MAV_SEVERITY_INFO, "Beginning Deployment");
+        gcs_send_text(MAV_SEVERITY_INFO, "Beginning Deployment...");
         // Kick off the timer
         *deployment_timer += 1;               
     }
@@ -720,6 +734,7 @@ void Plane::servos_payload_mix(void)
 
     if ( SRV_Channels::function_assigned( SRV_Channel::k_payload ) )
     {
+        int16_t auto_percent;
         int16_t percent;
         int8_t current_waypoint = mission.get_current_nav_index();
         // k_payload defined as fucntion number 88
@@ -735,14 +750,20 @@ void Plane::servos_payload_mix(void)
             ( control_mode == AUTO ) &&
             ( payload_1_deployed == 0 ) )
         {
-            payload_deployment_timer( &payload_1_deployed, &deployment_timer, &percent );
+            payload_deployment_timer( &payload_1_deployed, &deployment_timer, &auto_percent, 1 );
         }
         else if( ( current_waypoint > g2.payload_wp_2 ) &&
                  ( current_waypoint < g2.payload_wp_2 + 2 ) &&
                  ( control_mode == AUTO ) &&
                  ( payload_2_deployed == 0 ) )
         {
-            payload_deployment_timer( &payload_2_deployed, &deployment_timer, &percent );
+            payload_deployment_timer( &payload_2_deployed, &deployment_timer, &auto_percent, -1 );
+        }
+
+        // manual payload input overrides auto input
+        if (abs(percent) > abs(auto_percent) )
+        {
+            percent = auto_percent;
         }
 
         SRV_Channels::set_output_scaled( SRV_Channel::k_payload, percent);
