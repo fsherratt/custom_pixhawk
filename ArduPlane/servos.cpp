@@ -704,7 +704,7 @@ void Plane::payload_deployment_timer(int8_t *payload_deployed, int16_t *deployme
         }
 
         // Write deployed and prevent further calls
-        gcs_send_text_fmt(MAV_SEVERITY_WARNING, "Payload %i Deployed!", payload_num);
+        gcs_send_text_fmt(MAV_SEVERITY_WARNING, "Payload %u Deployed!", payload_num);
         *payload_deployed = 1;
         *deployment_timer = 0;
     }
@@ -734,7 +734,7 @@ void Plane::servos_payload_mix(void)
 
     if ( SRV_Channels::function_assigned( SRV_Channel::k_payload ) )
     {
-        int16_t auto_percent;
+        int16_t auto_percent = 0;
         int16_t percent;
         int8_t current_waypoint = mission.get_current_nav_index();
         // k_payload defined as fucntion number 88
@@ -761,7 +761,7 @@ void Plane::servos_payload_mix(void)
         }
 
         // manual payload input overrides auto input
-        if (abs(percent) > abs(auto_percent) )
+        if (abs(percent) < abs(auto_percent) )
         {
             percent = auto_percent;
         }
