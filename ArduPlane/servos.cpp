@@ -738,7 +738,7 @@ void Plane::servos_payload_mix(void)
         int16_t percent;
         int8_t current_waypoint = mission.get_current_nav_index();
         // k_payload defined as fucntion number 88
-        RC_Channel * payloadSel = RC_Channels::rc_channel( g2.payload_rc_in );
+        RC_Channel * payloadSel = RC_Channels::rc_channel( g2.payload_rc_in - 1 );
         payloadSel->input();
 
         // Gets out manual percentage
